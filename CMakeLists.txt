@@ -17,6 +17,10 @@ target_sources(coursegrade
         coursegrade.dat
     PRIVATE FILE_SET modules TYPE CXX_MODULES BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
         FILES
+        read.cpp
+        main.cpp
+        process.cpp
+        score.cpp
 )
 
 # Deployment settings
