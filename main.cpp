@@ -35,15 +35,22 @@ using std::runtime_error;
 using std::domain_error;
 using std::invalid_argument;
 
-//顶层分解
-struct Grade; //类型声明
+// 顶层分解，添加错误处理
+struct Grade //类型定义（需在 vector 实例化前定义完整类型）
+{
+    string name;
+    double midterm;
+    double final;
+    vector<double> homework;
+    double total; //总成绩，该数据成员可声明，也可不用声明
+};
+
 using CourseGrade = vector<Grade>; //类型别名
 
 extern void read(CourseGrade& cg);
 extern void computeSort(CourseGrade& cg);
 extern void print(CourseGrade& cg);
 
-// 第1次重构，添加错误处理
 int main()
 {
     CourseGrade courseGrade;
@@ -60,15 +67,6 @@ int main()
     return 0;
 }
 
-struct Grade //类型定义
-{
-    string name;
-    double midterm;
-    double final;
-    vector<double> homework;
-    double total; //总成绩，该数据成员可声明，也可不用声明
-};
-
 // 第二层分解，添加错误检测
 extern istream& operator>>(istream& is, Grade& g);
 void read(CourseGrade& cg)
@@ -79,13 +77,12 @@ void read(CourseGrade& cg)
     // read and store all the grades
     string line;
     istringstream iss;
-    while (std::getline(ifs, line)) {          // std::getline按行读取成功时，返回good的ifs
+    while (std::getline(ifs, line)) {
+        iss.clear();                           // 清除上一轮残留的状态位
         iss.str(line);                         // 字符串输入流iss封装字符串line进行流式输入
         Grade g;                               // 假定能够对g进行iss >> g读取操作
         if (iss >> g) {
             cg.push_back(g);                   // 读取成绩成功后，添加g到cg中
-        } else {
-            iss.clear();
         }
     }
     if(ifs.eof()) print("Reading done!\n\n");  // 读取完毕则打印
@@ -99,7 +96,7 @@ void computeSort(CourseGrade& cg)
         g.total = score(g);  //假定能够进行score(g)操作
     }
     stable_sort(cg, [](auto& g1, auto& g2){
-        return g1.total <= g2.total;
+        return g1.total < g2.total;            // 使用 < 满足严格弱序
     });
     print("Processing done!\n\n");
 }
@@ -174,4 +171,3 @@ double median(R&& data)
     // 使用 std::midpoint 防止极端值相加溢出
     return std::midpoint(*left_max, *mid);
 }
-
